@@ -1,0 +1,29 @@
+// Project: A system for streaming sheets
+version = '0.1'
+
+// Java components
+apply plugin: 'java'
+
+// IDE support
+apply plugin: 'eclipse'
+
+// Run support
+apply plugin:'application'
+
+// Language support
+sourceCompatibility = 1.8
+
+// Repositories
+repositories {
+    mavenCentral()
+}
+
+// External dependencies
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version: '16.0.1'
+}
+
+// Location of main (for running)
+mainClassName = ""
+
+defaultTasks 'build'

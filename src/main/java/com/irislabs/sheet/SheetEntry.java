@@ -1,0 +1,113 @@
+package com.irislabs.sheet;
+
+import java.util.*;
+import java.util.function.BiConsumer;
+
+/**
+ * Author: spartango
+ * Date: 4/14/14
+ * Time: 10:00 PM.
+ */
+public class SheetEntry {
+    private Map<String, String> fields;
+
+    public SheetEntry() {
+        fields = new LinkedHashMap<>();
+    }
+
+    public SheetEntry(Map<String, String> fields) {
+        this.fields = fields;
+    }
+
+    public Set<String> fields() {
+        return fields.keySet();
+    }
+
+    public Collection<String> values() {
+        return fields.values();
+    }
+
+    public void forEach(BiConsumer<? super String, ? super String> action) {
+        fields.forEach(action);
+    }
+
+    public String putIfAbsent(String key, String value) {
+        return fields.putIfAbsent(key, value);
+    }
+
+    public String get(String key) {
+        return fields.get(key);
+    }
+
+    public double getDouble(String key) throws NumberFormatException {
+        return Double.parseDouble(fields.get(key));
+    }
+
+    public int getInt(String key) throws NumberFormatException {
+        return Integer.parseInt(fields.get(key));
+    }
+
+    public String put(String key, String value) {
+        return fields.put(key, value);
+    }
+
+    public String put(String key, double value) {
+        return fields.put(key, String.valueOf(value));
+    }
+
+    public String put(String key, int value) {
+        return fields.put(key, String.valueOf(value));
+    }
+
+    public String remove(String key) {
+        return fields.remove(key);
+    }
+
+    public void putAll(Map<? extends String, ? extends String> m) {
+        fields.putAll(m);
+    }
+
+    public void putAllNumbers(Map<? extends String, ? extends Number> m) {
+        m.forEach((key, value) -> fields.put(key, String.valueOf(value)));
+    }
+
+    public boolean containsKey(String key) {
+        return fields.containsKey(key);
+    }
+
+    public String getOrDefault(String key, String defaultValue) {
+        return fields.getOrDefault(key, defaultValue);
+    }
+
+    public double getOrDefaultDouble(String key, double defaultValue) {
+        return fields.containsKey(key) ? getDouble(key) : defaultValue;
+    }
+
+    public int getOrDefaultInt(String key, int defaultValue) {
+        return fields.containsKey(key) ? getInt(key) : defaultValue;
+    }
+
+    public Set<Map.Entry<String, String>> entrySet() {
+        return fields.entrySet();
+    }
+
+    public static SheetEntry parseTabEntry(String line, List<String> fieldNames) {
+        return parseEntry(line, "\t", fieldNames);
+    }
+
+    public static SheetEntry parseCommaEntry(String line, List<String> fieldNames) {
+        return parseEntry(line, ",", fieldNames);
+    }
+
+    public static SheetEntry parseEntry(String line, String delimiter, List<String> fieldNames) {
+        SheetEntry entry = new SheetEntry();
+        String[] parts = line.split(delimiter);
+        int i = 0;
+        for (String field : fieldNames) {
+            entry.put(field, (i < parts.length ? parts[i] : ""));
+            i++;
+        }
+
+        return entry;
+    }
+}
