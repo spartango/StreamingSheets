@@ -9,14 +9,18 @@ import java.util.function.BiConsumer;
  * Time: 10:00 PM.
  */
 public class SheetEntry {
-    private Map<String, String> fields;
+    private LinkedHashMap<String, String> fields;
 
     public SheetEntry() {
         fields = new LinkedHashMap<>();
     }
 
     public SheetEntry(Map<String, String> fields) {
-        this.fields = fields;
+        this.fields = new LinkedHashMap<>(fields);
+    }
+
+    public SheetEntry(SheetEntry target) {
+        this(target.fields);
     }
 
     public Set<String> fields() {
@@ -33,6 +37,14 @@ public class SheetEntry {
 
     public String putIfAbsent(String key, String value) {
         return fields.putIfAbsent(key, value);
+    }
+
+    public String getPrimary() {
+        return fields.values().stream().findFirst().get();
+    }
+
+    public int getPrimaryInt() {
+        return Integer.parseInt(fields.values().stream().findFirst().get());
     }
 
     public String get(String key) {
