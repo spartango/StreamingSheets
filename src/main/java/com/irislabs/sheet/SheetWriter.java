@@ -3,7 +3,7 @@ package com.irislabs.sheet;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Consumer;
 
 /**
@@ -15,21 +15,23 @@ public class SheetWriter implements Consumer<SheetEntry> {
     private File   target;
     private String delimiter;
 
-    private FileWriter writer;
+    private Collection<String> fields;
+    private FileWriter         writer;
 
-    public SheetWriter(String path, List<String> header) throws IOException {
+    public SheetWriter(String path, Collection<String> header) throws IOException {
         this(new File(path), "\t", header);
     }
 
-    public SheetWriter(File target, String delimiter, List<String> header) throws IOException {
+    public SheetWriter(File target, String delimiter, Collection<String> header) throws IOException {
         this.target = target;
         this.delimiter = delimiter;
 
         writer = new FileWriter(target);
-        writeHeader(header);
+        fields = header;
+        writeHeader(fields);
     }
 
-    private void writeHeader(List<String> header) throws IOException {
+    private void writeHeader(Collection<String> header) throws IOException {
         StringBuilder builder = new StringBuilder();
         header.forEach(value -> {
             builder.append(value);
@@ -41,10 +43,12 @@ public class SheetWriter implements Consumer<SheetEntry> {
         writer.write(builder.toString());
     }
 
-    public void write(SheetEntry str) throws IOException {
+    public void write(SheetEntry entry) throws IOException {
         StringBuilder builder = new StringBuilder();
-        str.values().forEach(value -> {
-            builder.append(value);
+        fields.forEach(field -> {
+            if (entry.containsKey(field)) {
+                builder.append(entry.get(field));
+            }
             builder.append(delimiter);
         });
 

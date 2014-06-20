@@ -84,7 +84,7 @@ public class SheetEntry {
     }
 
     public boolean containsKey(String key) {
-        return fields.containsKey(key);
+        return fields.containsKey(key) && !fields.get(key).isEmpty();
     }
 
     public String getOrDefault(String key, String defaultValue) {
@@ -121,5 +121,13 @@ public class SheetEntry {
         }
 
         return entry;
+    }
+
+    public void append(SheetEntry entry) {
+        putAll(entry.fields);
+    }
+
+    public int getFieldCount() {
+        return fields.size();
     }
 }

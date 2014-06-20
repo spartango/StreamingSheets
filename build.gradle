@@ -8,7 +8,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 
 // Run support
-apply plugin:'application'
+apply plugin: 'application'
 
 // Language support
 sourceCompatibility = 1.8
@@ -21,6 +21,7 @@ repositories {
 // External dependencies
 dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '16.0.1'
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.2'
 }
 
 // Location of main (for running)
