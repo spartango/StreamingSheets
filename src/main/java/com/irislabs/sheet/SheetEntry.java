@@ -130,4 +130,18 @@ public class SheetEntry {
     public int getFieldCount() {
         return fields.size();
     }
+
+    public static SheetEntry byAppending(SheetEntry entry, String key, String value) {
+        SheetEntry newEntry = new SheetEntry();
+        newEntry.append(entry);
+        newEntry.put(key, value);
+        return newEntry;
+    }
+
+    public static SheetEntry merge(SheetEntry entry, SheetEntry secondEntry) {
+        SheetEntry newEntry = new SheetEntry();
+        newEntry.append(entry);
+        newEntry.append(secondEntry);
+        return newEntry;
+    }
 }
