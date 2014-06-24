@@ -4,14 +4,15 @@ import com.irislabs.sheet.FileSheet;
 import com.irislabs.sheet.SheetEntry;
 import com.irislabs.sheet.SheetMerger;
 import com.irislabs.sheet.SheetWriter;
-import org.apache.commons.lang3.StringUtils;
+import com.irislabs.stream.Numeric;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -22,21 +23,23 @@ import java.util.stream.Collectors;
 public class TCGAMerge {
     private static final Path   PATH   = FileSystems.getDefault()
                                                     .getPath("/Users/spartango/Dropbox/Iris/TCGA Clinical/");
-    private static final String OUTPUT = "/Users/spartango/Dropbox/Iris/TCGA Clinical/";
+        private static final String OUTPUT = "/Users/spartango/Dropbox/Iris/TCGA Clinical/";
+//    private static final String OUTPUT = "/Users/spartango/Downloads/";
 
     public static void main(String[] args) throws IOException {
         final Map<String, List<Path>> filesByCancer = Files.list(PATH)
                                                            .filter(path -> path.toString().contains("nationwide"))
-                                                           .collect(
-                                                                   Collectors.groupingBy(path -> {
-                                                                       String[] parts = path.toString().split("_");
-                                                                       return parts[parts.length - 1].split("\\.")[0];
-                                                                   }));
+                                                           .collect(Collectors.groupingBy(path -> {
+                                                               String[] parts = path.toString().split("_");
+                                                               return parts[parts.length - 1].split("\\.")[0];
+                                                           }));
 
         filesByCancer.forEach((cancer, paths) -> {
             SheetMerger merger = new SheetMerger();
             paths.stream()
                  .map(Path::toString)
+                 .sorted()
+                 .peek(System.out::println)
                  .map(path -> {
                      try {
                          return new FileSheet(path);
@@ -52,7 +55,7 @@ public class TCGAMerge {
                          System.out.println("Error appending " + cancer + ": " + e);
                      }
                  });
-            
+
             final Collection<SheetEntry> merged = merger.getMerged();
 
             try {
@@ -64,31 +67,7 @@ public class TCGAMerge {
 
             try {
                 SheetWriter numeric = new SheetWriter(OUTPUT + cancer + "_numeric.txt", merger.getFields());
-                Map<String, AtomicInteger> counterMap = new HashMap<>();
-                Map<String, Integer> numericMap = new TreeMap<>();
-                merger.getFields().forEach(field -> counterMap.put(field, new AtomicInteger(0)));
-
-                merged.stream().map(patient -> {
-                    SheetEntry newEntry = new SheetEntry();
-                    patient.forEach((key, value) -> {
-                        if (StringUtils.isNumeric(value)) {
-                            // Try to parse the value as is
-                            newEntry.put(key, Double.parseDouble(value));
-                        } else {
-                            // If this value hasn't been seen before
-                            String kvPair = key + "_" + value;
-
-                            if (!numericMap.containsKey(kvPair)) {
-                                int newValue = counterMap.get(key).getAndIncrement();
-                                numericMap.put(kvPair, newValue);
-                            }
-
-                            newEntry.put(key, numericMap.get(kvPair));
-                        }
-                    });
-                    return newEntry;
-                }).forEach(numeric);
-
+                merged.stream().map(Numeric.numerify(merger.getFields())).forEach(numeric);
             } catch (Exception e) {
                 System.out.println("Error numeric " + cancer + ": " + e);
             }
